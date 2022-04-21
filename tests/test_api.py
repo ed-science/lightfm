@@ -69,7 +69,7 @@ def test_coo_with_duplicate_entries():
     mat.row = np.concatenate((mat.row, mat.row[:1000]))
     mat.col = np.concatenate((mat.col, mat.col[:1000]))
 
-    for loss in ("warp", "bpr", "warp-kos"):
+    for _ in ("warp", "bpr", "warp-kos"):
         model = LightFM(loss="warp")
         model.fit(mat)
 

@@ -17,10 +17,10 @@ def _download(url: str, dest_path: str):
 
 def get_data():
 
-    ratings_url = ("http://www2.informatik.uni-freiburg.de/" "~cziegler/BX/BX-CSV-Dump.zip")
-
     if not os.path.exists("data"):
         os.makedirs("data")
+
+        ratings_url = ("http://www2.informatik.uni-freiburg.de/" "~cziegler/BX/BX-CSV-Dump.zip")
 
         _download(ratings_url, "data/data.zip")
 

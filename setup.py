@@ -23,16 +23,15 @@ def define_extensions(use_openmp):
     if 'anaconda' not in sys.version.lower():
         compile_args.append('-march=native')
 
-    if not use_openmp:
-        print('Compiling without OpenMP support.')
-        return [Extension("lightfm._lightfm_fast_no_openmp",
-                          ['lightfm/_lightfm_fast_no_openmp.c'],
-                          extra_compile_args=compile_args)]
-    else:
+    if use_openmp:
         return [Extension("lightfm._lightfm_fast_openmp",
                           ['lightfm/_lightfm_fast_openmp.c'],
                           extra_link_args=["-fopenmp"],
                           extra_compile_args=compile_args + ['-fopenmp'])]
+    print('Compiling without OpenMP support.')
+    return [Extension("lightfm._lightfm_fast_no_openmp",
+                      ['lightfm/_lightfm_fast_no_openmp.c'],
+                      extra_compile_args=compile_args)]
 
 
 class Cythonize(Command):
@@ -82,9 +81,7 @@ class Cythonize(Command):
             template = fl.read()
 
         for variant, template_params in params:
-            with open(os.path.join(file_dir,
-                                   '_lightfm_fast_{}.pyx'.format(variant)),
-                      'w') as fl:
+            with open(os.path.join(file_dir, f'_lightfm_fast_{variant}.pyx'), 'w') as fl:
                 fl.write(template.format(**template_params))
 
     def run(self):
@@ -151,9 +148,8 @@ setup(
     version=version,
     description='LightFM recommendation model',
     url='https://github.com/lyst/lightfm',
-    download_url='https://github.com/lyst/lightfm/tarball/{}'.format(version),
-    packages=['lightfm',
-              'lightfm.datasets'],
+    download_url=f'https://github.com/lyst/lightfm/tarball/{version}',
+    packages=['lightfm', 'lightfm.datasets'],
     package_data={'': ['*.c']},
     install_requires=['numpy', 'scipy>=0.17.0', 'requests', 'scikit-learn'],
     tests_require=['pytest', 'requests', 'scikit-learn'],
@@ -161,8 +157,10 @@ setup(
     author='Lyst Ltd (Maciej Kula)',
     author_email='data@ly.st',
     license='MIT',
-    classifiers=['Development Status :: 3 - Alpha',
-                 'License :: OSI Approved :: MIT License',
-                 'Topic :: Scientific/Engineering :: Artificial Intelligence'],
-    ext_modules=define_extensions(use_openmp)
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'License :: OSI Approved :: MIT License',
+        'Topic :: Scientific/Engineering :: Artificial Intelligence',
+    ],
+    ext_modules=define_extensions(use_openmp),
 )

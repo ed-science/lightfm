@@ -62,54 +62,60 @@ def test_build_features():
     dataset.fit(
         range(users),
         range(items),
-        ["user:{}".format(x) for x in range(users)],
-        ["item:{}".format(x) for x in range(items)],
+        [f"user:{x}" for x in range(users)],
+        [f"item:{x}" for x in range(items)],
     )
+
 
     # Build from lists
     user_features = dataset.build_user_features(
         [
-            (user_id, ["user:{}".format(x) for x in range(users)])
+            (user_id, [f"user:{x}" for x in range(users)])
             for user_id in range(users)
         ]
     )
+
     assert user_features.getnnz() == users ** 2
 
     item_features = dataset.build_item_features(
         [
-            (item_id, ["item:{}".format(x) for x in range(items)])
+            (item_id, [f"item:{x}" for x in range(items)])
             for item_id in range(items)
         ]
     )
+
     assert item_features.getnnz() == items ** 2
 
     # Build from dicts
     user_features = dataset.build_user_features(
         [
-            (user_id, {"user:{}".format(x): float(x) for x in range(users)})
+            (user_id, {f"user:{x}": float(x) for x in range(users)})
             for user_id in range(users)
         ],
         normalize=False,
     )
 
+
     assert np.all(user_features.todense() == np.array([list(range(users))] * users))
 
     item_features = dataset.build_item_features(
         [
-            (item_id, {"item:{}".format(x): float(x) for x in range(items)})
+            (item_id, {f"item:{x}": float(x) for x in range(items)})
             for item_id in range(items)
         ],
         normalize=False,
     )
+
 
     assert np.all(item_features.todense() == np.array([list(range(items))] * items))
 
     # Test normalization
     item_features = dataset.build_item_features(
         [
-            (item_id, {"item:{}".format(x): float(x) for x in range(items)})
+            (item_id, {f"item:{x}": float(x) for x in range(items)})
             for item_id in range(items)
         ]
     )
+
 
     assert np.all(item_features.sum(1) == 1.0)

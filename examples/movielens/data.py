@@ -71,11 +71,7 @@ def _build_interaction_matrix(rows, cols, data):
     mat = sp.lil_matrix((rows, cols), dtype=np.int32)
 
     for uid, iid, rating, timestamp in data:
-        if rating >= 4.0:
-            mat[uid, iid] = 1.0
-        else:
-            mat[uid, iid] = -1.0
-
+        mat[uid, iid] = 1.0 if rating >= 4.0 else -1.0
     return mat.tocoo()
 
 

@@ -320,25 +320,23 @@ class LightFM(object):
 
         # If we already have embeddings, verify that
         # we have them for all the supplied features
-        if self.user_embeddings is not None:
-            if not self.user_embeddings.shape[0] >= user_features.shape[1]:
-                raise ValueError(
-                    "The user feature matrix specifies more "
-                    "features than there are estimated "
-                    "feature embeddings: {} vs {}.".format(
-                        self.user_embeddings.shape[0], user_features.shape[1]
-                    )
-                )
+        if (
+            self.user_embeddings is not None
+            and not self.user_embeddings.shape[0] >= user_features.shape[1]
+        ):
+            raise ValueError(
+                f"The user feature matrix specifies more features than there are estimated feature embeddings: {self.user_embeddings.shape[0]} vs {user_features.shape[1]}."
+            )
 
-        if self.item_embeddings is not None:
-            if not self.item_embeddings.shape[0] >= item_features.shape[1]:
-                raise ValueError(
-                    "The item feature matrix specifies more "
-                    "features than there are estimated "
-                    "feature embeddings: {} vs {}.".format(
-                        self.item_embeddings.shape[0], item_features.shape[1]
-                    )
-                )
+
+        if (
+            self.item_embeddings is not None
+            and not self.item_embeddings.shape[0] >= item_features.shape[1]
+        ):
+            raise ValueError(
+                f"The item feature matrix specifies more features than there are estimated feature embeddings: {self.item_embeddings.shape[0]} vs {item_features.shape[1]}."
+            )
+
 
         user_features = self._to_cython_dtype(user_features)
         item_features = self._to_cython_dtype(item_features)
@@ -349,17 +347,11 @@ class LightFM(object):
 
         mat = interactions.tocsr()
 
-        if not mat.has_sorted_indices:
-            return mat.sorted_indices()
-        else:
-            return mat
+        return mat if mat.has_sorted_indices else mat.sorted_indices()
 
     def _to_cython_dtype(self, mat):
 
-        if mat.dtype != CYTHON_DTYPE:
-            return mat.astype(CYTHON_DTYPE)
-        else:
-            return mat
+        return mat.astype(CYTHON_DTYPE) if mat.dtype != CYTHON_DTYPE else mat
 
     def _process_sample_weight(self, interactions, sample_weight):
 
@@ -387,24 +379,23 @@ class LightFM(object):
                     "entries must be in the same order"
                 )
 
-            if sample_weight.data.dtype != CYTHON_DTYPE:
-                sample_weight_data = sample_weight.data.astype(CYTHON_DTYPE)
-            else:
-                sample_weight_data = sample_weight.data
-        else:
-            if np.array_equiv(interactions.data, 1.0):
+            return (
+                sample_weight.data.astype(CYTHON_DTYPE)
+                if sample_weight.data.dtype != CYTHON_DTYPE
+                else sample_weight.data
+            )
+
+        elif np.array_equiv(interactions.data, 1.0):
                 # Re-use interactions data if they are all
                 # ones
-                sample_weight_data = interactions.data
-            else:
+            return interactions.data
+        else:
                 # Otherwise allocate a new array of ones
-                sample_weight_data = np.ones_like(interactions.data, dtype=CYTHON_DTYPE)
-
-        return sample_weight_data
+            return np.ones_like(interactions.data, dtype=CYTHON_DTYPE)
 
     def _get_lightfm_data(self):
 
-        lightfm_data = FastLightFM(
+        return FastLightFM(
             self.item_embeddings,
             self.item_embedding_gradients,
             self.item_embedding_momentum,
@@ -424,8 +415,6 @@ class LightFM(object):
             self.epsilon,
             self.max_sampled,
         )
-
-        return lightfm_data
 
     def _check_finite(self):
 
@@ -469,7 +458,7 @@ class LightFM(object):
 
             def verbose_range():
                 for i in range(n):
-                    print("Epoch {}".format(i))
+                    print(f"Epoch {i}")
                     yield i
 
             return verbose_range()
@@ -625,10 +614,10 @@ class LightFM(object):
 
         # Check that the dimensionality of the feature matrices has
         # not changed between runs.
-        if not item_features.shape[1] == self.item_embeddings.shape[0]:
+        if item_features.shape[1] != self.item_embeddings.shape[0]:
             raise ValueError("Incorrect number of features in item_features")
 
-        if not user_features.shape[1] == self.user_embeddings.shape[0]:
+        if user_features.shape[1] != self.user_embeddings.shape[0]:
             raise ValueError("Incorrect number of features in user_features")
 
         if num_threads < 1:
@@ -829,8 +818,7 @@ class LightFM(object):
 
     def _check_test_train_intersections(self, test_mat, train_mat):
         if train_mat is not None:
-            n_intersections = test_mat.multiply(train_mat).nnz
-            if n_intersections:
+            if n_intersections := test_mat.multiply(train_mat).nnz:
                 raise ValueError(
                     "Test interactions matrix and train interactions "
                     "matrix share %d interactions. This will cause "
@@ -906,10 +894,10 @@ class LightFM(object):
             n_users, n_items, user_features, item_features
         )
 
-        if not item_features.shape[1] == self.item_embeddings.shape[0]:
+        if item_features.shape[1] != self.item_embeddings.shape[0]:
             raise ValueError("Incorrect number of features in item_features")
 
-        if not user_features.shape[1] == self.user_embeddings.shape[0]:
+        if user_features.shape[1] != self.user_embeddings.shape[0]:
             raise ValueError("Incorrect number of features in user_features")
 
         test_interactions = test_interactions.tocsr()
@@ -1020,7 +1008,7 @@ class LightFM(object):
             Parameter names mapped to their values.
         """
 
-        params = {
+        return {
             "loss": self.loss,
             "learning_schedule": self.learning_schedule,
             "no_components": self.no_components,
@@ -1034,8 +1022,6 @@ class LightFM(object):
             "user_alpha": self.user_alpha,
             "random_state": self.random_state,
         }
-
-        return params
 
     def set_params(self, **params):
         """

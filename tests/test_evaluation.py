@@ -67,9 +67,7 @@ def _precision_at_k(
         else:
             top_k = set(np.argsort(-predictions)[:k])
 
-        true_pids = set(row.indices[row.data == 1])
-
-        if true_pids:
+        if true_pids := set(row.indices[row.data == 1]):
             precisions.append(len(top_k & true_pids) / float(k))
 
     return sum(precisions) / len(precisions)
@@ -111,9 +109,7 @@ def _recall_at_k(
         else:
             top_k = set(np.argsort(-predictions)[:k])
 
-        true_pids = set(row.indices[row.data == 1])
-
-        if true_pids:
+        if true_pids := set(row.indices[row.data == 1]):
             recalls.append(len(top_k & true_pids) / float(len(true_pids)))
 
     return sum(recalls) / len(recalls)

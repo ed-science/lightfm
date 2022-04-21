@@ -70,7 +70,7 @@ def _parse_item_metadata(num_items, item_metadata_raw, genres_raw):
     for line in genres_raw:
         if line:
             genre, gid = line.split("|")
-            genres.append("genre:{}".format(genre))
+            genres.append(f"genre:{genre}")
 
     id_feature_labels = np.empty(num_items, dtype=np.object)
     genre_feature_labels = np.array(genres)
@@ -220,12 +220,10 @@ def fetch_movielens(
         features = sp.hstack([id_features, genre_features_matrix]).tocsr()
         feature_labels = np.concatenate((id_feature_labels, genre_feature_labels))
 
-    data = {
+    return {
         "train": train,
         "test": test,
         "item_features": features,
         "item_feature_labels": feature_labels,
         "item_labels": id_feature_labels,
     }
-
-    return data

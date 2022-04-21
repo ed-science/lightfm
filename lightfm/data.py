@@ -70,9 +70,7 @@ class _FeatureBuilder(object):
     def _iter_features(self, features):
 
         if isinstance(features, dict):
-            for entry in features.items():
-                yield entry
-
+            yield from features.items()
         else:
             for feature_name in features:
                 yield (feature_name, 1.0)
@@ -81,9 +79,9 @@ class _FeatureBuilder(object):
 
         if len(datum) != 2:
             raise ValueError(
-                "Expected tuples of ({}_id, features), "
-                "got {}.".format(self._entity_type, datum)
+                f"Expected tuples of ({self._entity_type}_id, features), got {datum}."
             )
+
 
         entity_id, features = datum
 
@@ -98,10 +96,7 @@ class _FeatureBuilder(object):
 
         for (feature, weight) in self._iter_features(features):
             if feature not in self._feature_mapping:
-                raise ValueError(
-                    "Feature {} not in feature mapping. "
-                    "Call fit first.".format(feature)
-                )
+                raise ValueError(f"Feature {feature} not in feature mapping. Call fit first.")
 
             feature_idx = self._feature_mapping[feature]
 
@@ -261,24 +256,24 @@ class Dataset(object):
             weight = 1.0
         else:
             raise ValueError(
-                "Expecting tuples of (user_id, item_id, weight) "
-                "or (user_id, item_id). Got {}".format(datum)
+                f"Expecting tuples of (user_id, item_id, weight) or (user_id, item_id). Got {datum}"
             )
+
 
         user_idx = self._user_id_mapping.get(user_id)
         item_idx = self._item_id_mapping.get(item_id)
 
         if user_idx is None:
             raise ValueError(
-                "User id {} not in user id mapping. Make sure "
-                "you call the fit method.".format(user_id)
+                f"User id {user_id} not in user id mapping. Make sure you call the fit method."
             )
+
 
         if item_idx is None:
             raise ValueError(
-                "Item id {} not in item id mapping. Make sure "
-                "you call the fit method.".format(item_id)
+                f"Item id {item_id} not in item id mapping. Make sure you call the fit method."
             )
+
 
         return (user_idx, item_idx, weight)
 

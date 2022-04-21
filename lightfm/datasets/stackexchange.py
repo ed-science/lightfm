@@ -143,7 +143,7 @@ def fetch_stackexchange(
 
     if indicator_features and not tag_features:
         features = sp.identity(train.shape[1], format="csr", dtype=np.float32)
-        labels = np.array(["question_id:{}".format(x) for x in range(train.shape[1])])
+        labels = np.array([f"question_id:{x}" for x in range(train.shape[1])])
     elif not indicator_features and tag_features:
         features = tag_features_mat.tocsr()
         labels = tag_labels
@@ -152,10 +152,11 @@ def fetch_stackexchange(
         features = sp.hstack([id_features, tag_features_mat]).tocsr()
         labels = np.concatenate(
             [
-                np.array(["question_id:{}".format(x) for x in range(train.shape[1])]),
+                np.array([f"question_id:{x}" for x in range(train.shape[1])]),
                 tag_labels,
             ]
         )
+
 
     return {
         "train": train,
